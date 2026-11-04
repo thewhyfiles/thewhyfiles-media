@@ -1,6 +1,6 @@
 const fs=require('fs');const S=process.env.S;
 const vo=JSON.parse(fs.readFileSync(S+'/vo/am_michael.json'));
-const ID=["Piramida Mesir berusia lebih dari 4.000 tahun.","Tapi kenapa bentuknya piramida?","Makam raja awalnya balok rendah dan datar: mastaba.","Lalu Imhotep menumpuknya, makin ke atas makin kecil.","Hasilnya: Piramida Bertingkat Djoser, tinggi sekitar 60 meter.","Batu kuat saat ditekan, tapi lemah saat dibengkokkan.","Di piramida, tiap balok bertumpu pada lapisan yang lebih lebar.","Sebagian besar massa ada di bawah, beban mengalir ke tanah.","Piramida Agung: bangunan tertinggi di Bumi hampir 4.000 tahun.","Setiap hal punya alasan."];
+const ID=["Lihat baik-baik QR code mana pun.","Ada tiga kotak besar di pojoknya. Kenapa?","Finder pattern ini menunjukkan posisi kode ke kamera.","Polanya sama: gelap, terang, inti tebal, terang, gelap.","Dari sudut mana pun lewat tengahnya, rasionya tetap 1:1:3:1:1.","Jadi pemindai langsung menemukannya, walau kodenya miring.","Satu pojok kosong, jadi pemindai tahu mana arah atas.","Kisinya diluruskan, lalu kotak kecil dibaca sebagai data.","Tiga kotak sederhana, sudut mana pun bisa.","Setiap hal punya alasan."];
 const fr=x=>Math.round(x*30)/30;
 let t=0.45;const lines=[];
 vo.forEach((v,i)=>{lines.push({i,start:fr(t),dur:v.dur,en:v.text,id:ID[i],path:v.path});t+=v.dur+0.32;});

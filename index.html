@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8">
 <meta name="viewport" content="width=720,height=1280">
-<title>The Why Files - Pyramid</title>
+<title>The Why Files - QR Code</title>
 <style>
 @font-face{font-family:Sora;font-weight:700;src:url(node_modules/@fontsource/sora/files/sora-latin-700-normal.woff2) format('woff2')}
 @font-face{font-family:Sora;font-weight:800;src:url(node_modules/@fontsource/sora/files/sora-latin-800-normal.woff2) format('woff2')}
@@ -12,7 +12,7 @@
 html,body{margin:0;width:720px;height:1280px;overflow:hidden;background:var(--ink)}
 #c{position:absolute;left:0;top:0;width:720px;height:1280px}
 #ov{position:absolute;left:0;top:0;width:720px;height:1280px;overflow:hidden}
-#vig{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(23,23,23,.55) 0%,rgba(23,23,23,0) 16%),radial-gradient(ellipse 85% 60% at 50% 37%,rgba(23,23,23,0) 40%,rgba(23,23,23,.78) 100%),linear-gradient(to bottom,rgba(23,23,23,0) 58%,rgba(23,23,23,.9) 76%,rgba(23,23,23,.95) 100%)}
+#vig{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(23,23,23,.7) 0%,rgba(23,23,23,0) 16%),radial-gradient(ellipse 85% 60% at 50% 37%,rgba(23,23,23,0) 40%,rgba(23,23,23,.78) 100%),linear-gradient(to bottom,rgba(23,23,23,0) 58%,rgba(23,23,23,.9) 76%,rgba(23,23,23,.95) 100%)}
 #wm{position:absolute;top:150px;left:0;right:0;text-align:center;font:500 22px Inter;letter-spacing:.06em;color:var(--paper);opacity:.5}
 #capbox{position:absolute;left:44px;right:44px;top:846px;text-align:center}
 #cap{font:700 46px/1.2 Sora;color:var(--paper);text-shadow:0 2px 16px rgba(0,0,0,.6)}
@@ -64,101 +64,76 @@ const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
 renderer.setPixelRatio(1);renderer.setSize(W,H,false);
 renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-const scene=new THREE.Scene();scene.background=new THREE.Color(INK);scene.fog=new THREE.Fog(INK,14,34);
+const scene=new THREE.Scene();scene.background=new THREE.Color(INK);scene.fog=new THREE.Fog(INK,24,52);
 const pm=new THREE.PMREMGenerator(renderer);
 scene.environment=pm.fromScene(new RoomEnvironment(),0.04).texture;scene.environmentIntensity=0.5;
 const cam=new THREE.PerspectiveCamera(38,W/H,0.1,80);
 cam.setViewOffset(W,H,0,150,W,H);
 
-const sun=new THREE.DirectionalLight(0xffe9d0,2.5);sun.position.set(5,9,4);sun.castShadow=true;
+const sun=new THREE.DirectionalLight(0xfff1e0,2.2);sun.position.set(4,9,3.5);sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048);
-Object.assign(sun.shadow.camera,{left:-10,right:10,top:10,bottom:-10,near:1,far:34});
-sun.shadow.bias=-0.0004;sun.shadow.normalBias=0.025;scene.add(sun);
-scene.add(new THREE.HemisphereLight(0xc4ccff,0x1c1b19,0.35));
+Object.assign(sun.shadow.camera,{left:-6,right:6,top:6,bottom:-6,near:1,far:28});
+sun.shadow.bias=-0.0004;sun.shadow.normalBias=0.02;scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xc4ccff,0x1c1c1b,0.35));
 
-// ---------- textures ----------
+// ---------- QR model ----------
+const N=21,M=0.2,HALF=N*M/2;
 function rngMaker(seed){return()=>(seed=(seed*16807)%2147483647)/2147483647}
-function sandTex(){const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');
-  g.fillStyle='#24221f';g.fillRect(0,0,512,512);const r=rngMaker(11);
-  for(let i=0;i<9000;i++){const v=Math.floor(30+r()*40);g.fillStyle=`rgba(${v+4},${v+1},${v-4},${.2+r()*.4})`;const s=1+r()*2.2;g.fillRect(r()*512,r()*512,s,s);}
-  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(10,10);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t;}
-function stoneCanvas(rows,cols,base,line){const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');
-  g.fillStyle=base;g.fillRect(0,0,512,512);const r=rngMaker(5);
-  for(let i=0;i<6000;i++){const v=r()>.5?255:0;g.fillStyle=`rgba(${v},${v},${v},${.03+r()*.05})`;g.fillRect(r()*512,r()*512,2,2);}
-  g.strokeStyle=line;g.lineWidth=4;const rh=512/rows,cw=512/cols;
-  for(let y=0;y<=rows;y++){g.beginPath();g.moveTo(0,y*rh);g.lineTo(512,y*rh);g.stroke();
-    for(let x=0;x<cols;x++){const xx=(x+(y%2?.5:0))*cw;g.beginPath();g.moveTo(xx,y*rh);g.lineTo(xx,(y+1)*rh);g.stroke();}}
-  return c;}
-const stoneC=stoneCanvas(3,6,'#7f7a70','#57534b');
-const sand=sandTex();
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(90,90).rotateX(-Math.PI/2),new THREE.MeshStandardMaterial({map:sand,roughness:1,metalness:0}));
-floor.receiveShadow=true;scene.add(floor);
-
-// ---------- step pyramid (6 tiers) ----------
-const NT=6,B=3.2,TOP=1.1,TH=.34;
-const tw=i=>lerp(B,TOP,i/(NT-1));
-const tiers=[],tierMats=[];
-for(let i=0;i<NT;i++){const w=tw(i);
-  const tex=new THREE.CanvasTexture(stoneC);tex.colorSpace=THREE.SRGBColorSpace;tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(Math.max(1,Math.round(w*1.6)),1);tex.anisotropy=8;
-  const mat=new THREE.MeshStandardMaterial({map:tex,roughness:.92,metalness:0,transparent:true,opacity:1});tierMats.push(mat);
-  const m=new THREE.Mesh(new THREE.BoxGeometry(w,TH,w),mat);m.castShadow=m.receiveShadow=true;scene.add(m);tiers.push(m);}
-const tierY=i=>TH*(i+.5);
-const STEP_H=TH*NT;
-const centroidY=(()=>{let s=0,m=0;for(let i=0;i<NT;i++){const a=tw(i)**2;s+=a*tierY(i);m+=a}return s/m})();
-
-// ---------- smooth (Giza) pyramids ----------
-const GB=3.3,GH=2.1;
-const gTexC=(()=>{const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');g.fillStyle='#7a756a';g.fillRect(0,0,512,512);
-  const r=rngMaker(9);for(let i=0;i<7000;i++){const v=r()>.5?255:0;g.fillStyle=`rgba(${v},${v},${v},${.03+r()*.05})`;g.fillRect(r()*512,r()*512,2,2);}
-  g.strokeStyle='rgba(70,66,58,.5)';g.lineWidth=2;for(let y=0;y<512;y+=22){g.beginPath();g.moveTo(0,y);g.lineTo(512,y);g.stroke()}return c})();
-function giza(scale){const tex=new THREE.CanvasTexture(gTexC);tex.colorSpace=THREE.SRGBColorSpace;
-  const mat=new THREE.MeshStandardMaterial({map:tex,roughness:.88,metalness:0,transparent:true,opacity:1,flatShading:true});
-  const geo=new THREE.ConeGeometry(GB/Math.SQRT2,GH,4,1);geo.rotateY(Math.PI/4);geo.translate(0,GH/2,0);
-  const m=new THREE.Mesh(geo,mat);m.castShadow=m.receiveShadow=true;m.scale.setScalar(scale);scene.add(m);return m;}
-const gMain=giza(1),gSecond=giza(.95),gThird=giza(.5);
-gSecond.position.set(-4.2,0,-5.5);gThird.position.set(3.8,0,-7.5);
-
-// ---------- helper visuals ----------
+const isFinder=(r,c)=>(r<8&&c<8)||(r<8&&c>=N-8)||(r>=N-8&&c<8);
+const grid=[];{const rnd=rngMaker(20261104);
+  for(let r=0;r<N;r++){grid[r]=[];for(let c=0;c<N;c++){let v;
+    if(isFinder(r,c))v=0;else if(r==6)v=(c%2==0)?1:0;else if(c==6)v=(r%2==0)?1:0;else v=rnd()<.5?1:0;grid[r][c]=v}}
+  grid[13][8]=1;}
+const mx=c=>(c-10)*M, mz=r=>(r-10)*M;
+const qr=new THREE.Group();scene.add(qr);
+const plateMat=new THREE.MeshStandardMaterial({color:0xa9a59a,roughness:.8,metalness:0});
+const fBaseMat=new THREE.MeshStandardMaterial({color:0xa9a59a,roughness:.8,metalness:0});
+const inkMat=new THREE.MeshStandardMaterial({color:0x1d1d1d,roughness:.55,metalness:.1});
+const PW=25*M;
+const plate=new THREE.Mesh(new THREE.BoxGeometry(PW,.24,PW),[plateMat,plateMat,plateMat,plateMat,plateMat,plateMat]);plate.position.y=-.12;plate.castShadow=plate.receiveShadow=true;qr.add(plate);
+const DH=.09;
+const data=[];for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(grid[r][c])data.push([r,c]);
+// reading order: zig-zag columns pairs from bottom right
+const order=data.map((d,i)=>i).sort((a,b)=>{const A=data[a],B=data[b];const pa=Math.floor((N-1-A[1])/2),pb=Math.floor((N-1-B[1])/2);if(pa!=pb)return pa-pb;const up=pa%2==0;return up?(B[0]-A[0]):(A[0]-B[0])});
+const rank=new Array(data.length);order.forEach((idx,k)=>rank[idx]=k);
+const inst=new THREE.InstancedMesh(new THREE.BoxGeometry(M*.985,DH,M*.985),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.55,metalness:.1}),data.length);
+inst.castShadow=inst.receiveShadow=true;qr.add(inst);
+const dummy=new THREE.Object3D(),cInk=new THREE.Color(0x1d1d1d),cBlue=new THREE.Color(BLUE),tmpC=new THREE.Color();
+let instDirty=true;
+function setInst(scaleFn,colorFn){for(let i=0;i<data.length;i++){const [r,c]=data[i];const s=scaleFn?scaleFn(i):1;dummy.position.set(mx(c),DH/2*s,mz(r));dummy.scale.set(Math.max(s,.001),Math.max(s,.001),Math.max(s,.001));dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix);
+  inst.setColorAt(i,colorFn?colorFn(i):cInk)}inst.instanceMatrix.needsUpdate=true;inst.instanceColor.needsUpdate=true;}
+setInst();
 const blueBasic=(op=1)=>new THREE.MeshBasicMaterial({color:BLUE,transparent:true,opacity:op,toneMapped:false,depthWrite:false});
-const paperBasic=(op=1)=>new THREE.MeshBasicMaterial({color:PAPER,transparent:true,opacity:op,toneMapped:false,depthWrite:false});
-function frame(outer,inner,mat){const s=new THREE.Shape();s.moveTo(-outer,-outer);s.lineTo(outer,-outer);s.lineTo(outer,outer);s.lineTo(-outer,outer);s.closePath();
-  if(inner>0){const p=new THREE.Path();p.moveTo(-inner,-inner);p.lineTo(-inner,inner);p.lineTo(inner,inner);p.lineTo(inner,-inner);p.closePath();s.holes.push(p);}
-  const m=new THREE.Mesh(new THREE.ShapeGeometry(s).rotateX(-Math.PI/2),mat);m.renderOrder=5;scene.add(m);return m;}
-// terrace highlights (top of each tier)
-const terr=[];for(let i=0;i<NT;i++){const o=tw(i)/2+.012,inn=o-.075;const f=frame(o,inn,blueBasic(1));f.position.y=TH*(i+1)+.004;terr.push(f)}
-// ground ring around the base
-const baseRing=frame(B/2+.2,B/2+.1,blueBasic(1));baseRing.position.y=.01;
-const baseGlow=frame(B/2+.45,B/2+.2,blueBasic(.2));baseGlow.position.y=.008;
-const gRing=frame(GB/2+.2,GB/2+.1,blueBasic(1));gRing.position.y=.01;
-// height bar
-const hbar=new THREE.Group();{const m=blueBasic(1);const bar=new THREE.Mesh(new THREE.BoxGeometry(.045,1,.045).translate(0,.5,0),m);bar.name='bar';hbar.add(bar);
-  const cap=new THREE.Mesh(new THREE.BoxGeometry(.32,.045,.045),m);cap.name='cap';hbar.add(cap);const foot=new THREE.Mesh(new THREE.BoxGeometry(.32,.045,.045),m);hbar.add(foot);scene.add(hbar);}
-function setHBar(x,z,h,ry=0){hbar.visible=h>.02;hbar.position.set(x,0,z);hbar.rotation.y=ry;hbar.getObjectByName('bar').scale.y=Math.max(h,1e-3);hbar.getObjectByName('cap').position.y=h;}
-// arrows
-const arrows=[];
-function mkArrow(){const g=new THREE.Group();const mat=blueBasic(1);mat.depthTest=false;
-  const cone=new THREE.Mesh(new THREE.ConeGeometry(.14,.3,24).rotateX(Math.PI).translate(0,.15,0),mat);
-  const shaft=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,1,16).translate(0,.5,0),mat);shaft.name='s';g.add(cone);g.add(shaft);g.userData.mat=mat;g.renderOrder=9;cone.renderOrder=shaft.renderOrder=9;scene.add(g);return g;}
-for(let k=0;k<9;k++)arrows.push(mkArrow());
-// arrow tip at p, pointing along dir (unit), shaft length L
-function setArrow(a,p,dir,L,op=1){a.visible=op>0.01;a.position.copy(p);a.quaternion.setFromUnitVectors(new THREE.Vector3(0,-1,0),dir.clone().normalize());
-  const s=a.getObjectByName('s');s.position.y=.28;s.scale.y=Math.max(L,1e-3);a.userData.mat.opacity=op;}
-// centroid sphere
-const cog=new THREE.Mesh(new THREE.SphereGeometry(.17,32,16),new THREE.MeshBasicMaterial({color:BLUE,toneMapped:false,depthTest:false,transparent:true}));cog.renderOrder=10;scene.add(cog);
-const cogHalo=new THREE.Mesh(new THREE.SphereGeometry(.32,32,16),new THREE.MeshBasicMaterial({color:BLUE,toneMapped:false,depthTest:false,transparent:true,opacity:.25,depthWrite:false}));cogHalo.renderOrder=10;scene.add(cogHalo);
-// stone test pieces (scene 5)
-const testTex=new THREE.CanvasTexture(stoneC);testTex.colorSpace=THREE.SRGBColorSpace;
-const testMat=new THREE.MeshStandardMaterial({map:testTex,roughness:.92});
-const cube=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.2,1.2),testMat);cube.castShadow=cube.receiveShadow=true;scene.add(cube);
-const posts=[-1,1].map(s=>{const m=new THREE.Mesh(new THREE.BoxGeometry(.5,1.1,.6),testMat);m.position.set(s*1.45,.55,0);m.castShadow=m.receiveShadow=true;scene.add(m);return m});
-const halves=[-1,1].map(s=>{const piv=new THREE.Group();piv.position.set(s*1.7,1.1,0);const m=new THREE.Mesh(new THREE.BoxGeometry(1.7,.26,.5),testMat);m.position.set(-s*.85,.13,0);m.castShadow=m.receiveShadow=true;piv.add(m);scene.add(piv);return piv});
-const weight=new THREE.Mesh(new THREE.BoxGeometry(.55,.55,.55),new THREE.MeshStandardMaterial({color:0x5d5a54,roughness:.6,metalness:.4}));weight.castShadow=true;scene.add(weight);
+function frameGeo(ho,hi){const s=new THREE.Shape();s.moveTo(-ho,-ho);s.lineTo(ho,-ho);s.lineTo(ho,ho);s.lineTo(-ho,ho);s.closePath();const p=new THREE.Path();p.moveTo(-hi,-hi);p.lineTo(-hi,hi);p.lineTo(hi,hi);p.lineTo(hi,-hi);p.closePath();s.holes.push(p);return new THREE.ShapeGeometry(s).rotateX(-Math.PI/2)}
+const FC=[[-1.4,-1.4],[1.4,-1.4],[-1.4,1.4]];
+const finders=FC.map(([x,z])=>{const g=new THREE.Group();g.position.set(x,0,z);
+  const base=new THREE.Mesh(new THREE.BoxGeometry(7*M,.06,7*M),fBaseMat);base.position.y=-.027;base.castShadow=base.receiveShadow=true;g.add(base);
+  const a=3.5*M,b=2.5*M;const sides=[[0,-(a+b)/2,7*M,M],[0,(a+b)/2,7*M,M],[-(a+b)/2,0,M,5*M],[(a+b)/2,0,M,5*M]];
+  for(const [sx,sz,w,d] of sides){const m=new THREE.Mesh(new THREE.BoxGeometry(w*.995,DH,d*.995),inkMat);m.position.set(sx,DH/2,sz);m.castShadow=m.receiveShadow=true;g.add(m)}
+  const core=new THREE.Mesh(new THREE.BoxGeometry(3*M*.995,DH,3*M*.995),inkMat);core.position.y=DH/2;core.castShadow=core.receiveShadow=true;g.add(core);
+  const ring=new THREE.Mesh(frameGeo(3.5*M*1.2,3.5*M*1.09),blueBasic());ring.position.y=.005;ring.renderOrder=5;g.add(ring);
+  const glow=new THREE.Mesh(frameGeo(3.5*M*1.42,3.5*M*1.2),blueBasic(.2));glow.position.y=.004;glow.renderOrder=4;g.add(glow);
+  qr.add(g);return{g,ring,glow,x,z};});
+// empty corner dashed outline
+const emptyMark=new THREE.Group();{const h=3.5*M*1.1,n=6,mat=blueBasic();for(let s=0;s<4;s++)for(let k=0;k<n;k++){const L=2*h/n*.55;const m=new THREE.Mesh(new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2),mat);const t=-h+2*h/n*(k+.5);
+  if(s<2){m.position.set(t,0,s==0?-h:h);m.scale.set(L,1,.06)}else{m.position.set(s==2?-h:h,0,t);m.scale.set(.06,1,L)}m.renderOrder=6;emptyMark.add(m)}
+  emptyMark.position.set(1.4,.13,1.4);qr.add(emptyMark);}
+// lines & dots (qr-local)
+const lineGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);
+const dotGeo=new THREE.CircleGeometry(1,32).rotateX(-Math.PI/2);
+function mkLine(mat){const m=new THREE.Mesh(lineGeo,mat);m.renderOrder=7;qr.add(m);return m}
+function mkDot(mat){const m=new THREE.Mesh(dotGeo,mat);m.renderOrder=8;qr.add(m);return m}
+function setLine(m,x0,z0,x1,z1,w,y=.105){const dx=x1-x0,dz=z1-z0,L=Math.hypot(dx,dz);m.position.set((x0+x1)/2,y,(z0+z1)/2);m.rotation.set(0,-Math.atan2(dz,dx),0);m.scale.set(Math.max(L,1e-4),1,w);m.visible=L>1e-3}
+function setDot(m,x,z,r,y=.11){m.position.set(x,y,z);m.scale.set(r,1,r);m.visible=true}
+const cutLine=mkLine(blueBasic());const ticks=[];for(let k=0;k<6;k++){const o=mkDot(new THREE.MeshBasicMaterial({color:PAPER,toneMapped:false,depthWrite:false,transparent:true}));o.renderOrder=9;const i=mkDot(blueBasic());i.renderOrder=10;ticks.push({o,i})}
+const beam=mkLine(blueBasic(1)),beamGlow=mkLine(blueBasic(.16));
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80).rotateX(-Math.PI/2),new THREE.MeshStandardMaterial({color:0x1b1b1a,roughness:1}));ground.position.y=-1.1;ground.receiveShadow=true;scene.add(ground);
 
 // ---------- DOM chips / captions ----------
 const ov=document.getElementById('ov'),capEl=document.getElementById('cap'),subEl=document.getElementById('sub'),endEl=document.getElementById('end'),fadeEl=document.getElementById('fade'),capbox=document.getElementById('capbox');
 const tagwrap=document.getElementById('tagwrap');
 const chipEls={};
-const CHECK='<svg width="28" height="28" viewBox="0 0 28 28"><path d="M4 15l7 7L24 6" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const UP='<svg width="24" height="28" viewBox="0 0 24 28"><path d="M12 25V4M3 12l9-9 9 9" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function chip(id,html,anchor,t0,u,{kind='',dx=0,dy=-8,until=1e9}={}){
   let el=chipEls[id];if(!el){el=document.createElement('div');el.className='chip '+kind;el.innerHTML=html;ov.appendChild(el);chipEls[id]=el}
   const age=u-t0;if(age<0||u>until)return;
@@ -168,79 +143,78 @@ function chip(id,html,anchor,t0,u,{kind='',dx=0,dy=-8,until=1e9}={}){
 
 // ---------- camera helpers ----------
 const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const Lw=(x,y,z)=>{qr.updateMatrixWorld(true);return qr.localToWorld(V(x,y,z))};
 function camOrbit(tg,az,el,dist){cam.position.set(tg.x+dist*Math.cos(el)*Math.sin(az),tg.y+dist*Math.sin(el),tg.z+dist*Math.cos(el)*Math.cos(az));cam.up.set(0,1,0);cam.lookAt(tg)}
-function showSteps(n=NT,op=1){for(let i=0;i<NT;i++){tiers[i].visible=i<n;tierMats[i].opacity=op;tierMats[i].depthWrite=op>.99}}
+function camTop(tg,h,roll=0){cam.position.set(tg.x,tg.y+h,tg.z+1e-4);cam.up.set(Math.sin(roll),0,-Math.cos(roll));cam.lookAt(tg)}
 function resetObjs(){
-  for(const o of [...tiers,...terr,gMain,gSecond,gThird,baseRing,baseGlow,gRing,hbar,cog,cogHalo,cube,...posts,...halves,weight,...arrows])o.visible=false;
-  for(let i=0;i<NT;i++){tiers[i].position.set(0,tierY(i),0);tiers[i].scale.set(1,1,1);tierMats[i].opacity=1;tierMats[i].depthWrite=true}
-  for(const g of [gMain,gSecond,gThird]){g.material.opacity=1;g.material.depthWrite=true}
-  gMain.scale.setScalar(1);gMain.rotation.set(0,0,0);
-  for(const h of halves)h.rotation.set(0,0,0);
-  cube.scale.set(1,1,1);
+  qr.position.set(0,0,0);qr.rotation.set(0,0,0,'XYZ');plateMat.color.setHex(0xa9a59a);
+  for(const f of finders){f.g.position.set(f.x,0,f.z);f.ring.visible=f.glow.visible=false;f.ring.material.opacity=1;f.glow.material.opacity=.2;f.g.rotation.set(0,0,0);f.g.scale.set(1,1,1)}
+  for(const o of [emptyMark,cutLine,beam,beamGlow])o.visible=false;for(const t of ticks){t.o.visible=t.i.visible=false}
+  if(instDirty){setInst();instDirty=false}
   for(const e of Object.values(chipEls))e.style.display='none';
 }
-function pulse(t,a=.03){return 1+a*Math.sin(t*5)}
+function ringsOn(f,op,t=0){f.ring.visible=f.glow.visible=op>0.001;f.ring.material.opacity=op;f.glow.material.opacity=.2*op*(1+.25*Math.sin(t*5))}
+function lift(f,h){f.g.position.y=h}
+function sweep(p){const z=lerp(-HALF-.5,HALF+.5,p);setLine(beam,-PW/2,z,PW/2,z,.05,.15);setLine(beamGlow,-PW/2,z-.3,PW/2,z-.3,.6,.14);}
+function ratioLine(fi,theta,grow){const f=finders[fi];const c=Math.cos(theta),s=Math.sin(theta),k=1/Math.max(Math.abs(c),Math.abs(s));
+  const R=3.5*M*k+.18;const x0=f.x-c*R,z0=f.z-s*R;const len=2*R*grow;setLine(cutLine,x0,z0,x0+c*len,z0+s*len,.045,.105);
+  const ds=[-3.5,-2.5,-1.5,1.5,2.5,3.5];ds.forEach((d,j)=>{const dd=d*M*k;const along=dd+R;const on=along<=len+1e-3;const T=ticks[j];if(!on){T.o.visible=T.i.visible=false;return}
+    const x=f.x+c*dd,z=f.z+s*dd;setDot(T.o,x,z,.085,.11);setDot(T.i,x,z,.055,.112)});}
 
 // ---------- scenes ----------
 const S=[];
-// 0: Giza trio, low dolly
-S[0]=(u,d,t)=>{gMain.visible=gSecond.visible=gThird.visible=true;
-  const k=eio(u/d);camOrbit(V(0,1.1,-1.5),lerp(-.55,-.25,k),lerp(.12,.2,k),lerp(18.5,16.2,k));
-  chip('age','4.000+ TAHUN',V(0,GH+.05,0),1.2,u,{kind:'paper',dy:-14});};
-// 1: why this shape?
-S[1]=(u,d,t)=>{gMain.visible=gSecond.visible=gThird.visible=true;gRing.visible=true;gRing.material.opacity=eo(seg(u,.2,.7));
-  const k=eio(u/d);camOrbit(V(0,.9,0),lerp(-.2,.15,k),lerp(.3,.42,k),lerp(16,15,k));
-  chip('why','KENAPA PIRAMIDA?',V(0,GH+.05,0),.45,u,{kind:'paper',dy:-14});};
-// 2: mastaba
-S[2]=(u,d,t)=>{showSteps(1);const s=eob(seg(u,.1,.6));tiers[0].scale.set(Math.max(s,.001),Math.max(s,.001),Math.max(s,.001));tiers[0].position.y=TH/2*s;
-  const k=eio(u/d);camOrbit(V(0,.3,0),lerp(.9,.55,k),lerp(.5,.4,k),lerp(13.6,12.8,k));
-  chip('mastaba','MASTABA',V(0,TH,0),1.6,u,{kind:'paper',dy:-26});
-  chip('flat','RENDAH & DATAR',[W/2,800],2.6,u,{dy:0});};
-// 3: Imhotep stacks them
-S[3]=(u,d,t)=>{showSteps(NT);
-  for(let i=1;i<NT;i++){const t0=.25+(i-1)*.5;const p=seg(u,t0,t0+.34);tiers[i].visible=u>=t0;tiers[i].position.y=tierY(i)+2.6*(1-p*p);}
-  const k=eio(u/d);camOrbit(V(0,.85,0),lerp(.55,.25,k),lerp(.5,.42,k),lerp(12.2,13.4,k));
-  chip('imh','IMHOTEP · ±2670 SM',[W/2,800],.35,u,{kind:'paper',dy:0});};
-// 4: Djoser step pyramid ~60 m
-S[4]=(u,d,t)=>{showSteps(NT);
-  const k=eio(u/d);camOrbit(V(0,.9,0),lerp(.25,-.35,k),lerp(.42,.3,k),lerp(13.4,13.8,k));
-  const hb=eo(seg(u,1.2,2.4));setHBar(B/2+.55,B/2+.55,STEP_H*hb,Math.PI/4);
-  chip('djoser','DJOSER',V(0,STEP_H,0),.5,u,{kind:'paper',dy:-16});
-  chip('60m','±60 M',V(B/2+.55,STEP_H,B/2+.55),2.4,u,{dy:-14});};
-// 5: compression vs bending
-S[5]=(u,d,t)=>{const k=eio(u/d);camOrbit(V(0,.85,0),lerp(.3,.1,k),.32,8.6);
-  if(u<1.75){cube.visible=true;const sq=eo(seg(u,.35,.75));cube.scale.set(1+.03*sq,1-.05*sq,1+.03*sq);cube.position.y=.6*(1-.05*sq);
-    const top=cube.position.y*2;setArrow(arrows[0],V(0,top+.05,0),V(0,-1,0),lerp(.75,.5,sq),eo(seg(u,.15,.4)));
-    setArrow(arrows[1],V(-.35,top+.05,0),V(0,-1,0),lerp(.75,.5,sq),eo(seg(u,.2,.45)));setArrow(arrows[2],V(.35,top+.05,0),V(0,-1,0),lerp(.75,.5,sq),eo(seg(u,.25,.5)));
-    chip('kuat',CHECK+'DITEKAN: KUAT',V(0,1.25,0),.7,u,{dy:-40});}
-  else{for(const p of posts)p.visible=true;for(const h of halves)h.visible=true;weight.visible=true;
-    const a=eio(seg(u,1.9,2.55))*.06+eo(seg(u,2.55,2.85))*.32;halves[0].rotation.z=-a;halves[1].rotation.z=a;
-    const drop=Math.sin(a)*1.7;weight.position.set(0,1.1+.26+.275-drop+(1-eo(seg(u,1.75,2.0)))*1.2,0);
-    chip('lemah','DIBENGKOKKAN: RETAK',V(0,1.3,0),2.6,u,{kind:'paper',dy:-120});}};
-// 6: each layer rests on a wider one
-S[6]=(u,d,t)=>{showSteps(NT);
-  const k=eio(u/d);camOrbit(V(0,.8,0),lerp(-.4,.4,k),lerp(.62,.72,k),lerp(12.6,12.0,k));
-  for(let i=NT-1;i>=0;i--){const t0=.4+(NT-1-i)*.38;terr[i].visible=u>=t0;terr[i].material.opacity=eo(seg(u,t0,t0+.3))*(i==NT-1?1:.9);}
-  chip('lebar','LAPISAN BAWAH LEBIH LEBAR',[W/2,800],2.6,u,{kind:'paper',dy:0});};
-// 7: x-ray: mass low, load into ground
-S[7]=(u,d,t)=>{showSteps(NT,lerp(1,.3,eo(seg(u,.1,.7))));
-  const k=eio(u/d);camOrbit(V(0,.8,0),lerp(.35,.6,k),lerp(.36,.3,k),lerp(13.8,13.2,k));
-  cog.visible=cogHalo.visible=u>.6;const cs=eob(seg(u,.6,1.0));cog.position.set(0,centroidY,0);cog.scale.setScalar(Math.max(cs,.001));cogHalo.position.copy(cog.position);cogHalo.scale.setScalar(Math.max(cs,.001)*pulse(t,.08));
-  const xs=[-1.15,-.58,0,.58,1.15];
-  for(let j=0;j<xs.length;j++){const ph=((u-1.3)*.9+j*.37)%1;const on=u>1.3?1:0;const x0=xs[j]*.35,x1=xs[j];
-    const y=lerp(STEP_H*.8-Math.abs(xs[j])*.6,.35,ph);const x=lerp(x0,x1,ph);const dir=V(x1-x0,-(STEP_H*.8-Math.abs(xs[j])*.6-.35),0).normalize();
-    setArrow(arrows[j],V(x,y,.0),dir,.45,on*Math.sin(Math.PI*ph)*.95);}
-  baseRing.visible=baseGlow.visible=u>1.6;baseRing.material.opacity=eo(seg(u,1.6,2.1));baseGlow.material.opacity=.22*eo(seg(u,1.6,2.1));const gs=pulse(t,.02);baseGlow.scale.set(gs,1,gs);
-  chip('massa','MASSA DI BAWAH',V(0,centroidY,0),.9,u,{dy:-30,dx:0});};
-// 8: smoothed -> Great Pyramid, tallest ~3,800 yrs
-S[8]=(u,d,t)=>{const f=eo(seg(u,.2,1.4));showSteps(f>.985?0:NT);gMain.visible=true;gMain.material.opacity=f;gMain.material.depthWrite=f>.985;gMain.scale.setScalar(lerp(1.05,1,f));
-  const k=eio(u/d);camOrbit(V(0,1.0,0),lerp(.55,-.15,k),lerp(.34,.22,k),lerp(13.4,14.6,k));
-  const hb=eo(seg(u,1.6,2.6));setHBar(GB/2+.55,GB/2+.55,GH*hb,Math.PI/4);
-  chip('146','146 M',V(GB/2+.55,GH,GB/2+.55),2.6,u,{dy:-14});
-  chip('tall','TERTINGGI ±3.800 TAHUN',[W/2,800],3.4,u,{kind:'paper',dy:0});};
+// 0: look at a QR code (modules build up)
+S[0]=(u,d,t)=>{const k=eio(u/d);camTop(V(0,0,0),lerp(25,19,k),lerp(.5,0,k));
+  setInst(i=>eob(seg(u,.1+rank[i]/data.length*1.4*0+((i*37)%data.length)/data.length*1.3,.45+((i*37)%data.length)/data.length*1.3)),null);instDirty=true;};
+// 1: three big squares lift, why?
+S[1]=(u,d,t)=>{const k=eio(u/d);camOrbit(V(0,0,.2),lerp(.5,-.25,k),lerp(1.15,.95,k),lerp(18.8,17.8,k));
+  finders.forEach((f,j)=>{const a=eob(seg(u,.35+j*.3,.85+j*.3));lift(f,.45*a);ringsOn(f,seg(u,.35+j*.3,.7+j*.3),t)});
+  chip('tiga','3 KOTAK BESAR',Lw(0,.5,-1.4-.9),1.4,u,{until:2.35,dy:-14});
+  chip('kenapa','KENAPA?',[W/2,800],2.45,u,{kind:'paper',dy:0});};
+// 2: finder patterns = position markers, scan beam
+S[2]=(u,d,t)=>{const k=eio(u/d);camOrbit(V(0,0,.2),lerp(-.25,.2,k),lerp(.95,1.0,k),lerp(17.8,17.4,k));
+  finders.forEach(f=>{lift(f,.45*(1-eio(seg(u,1.6,2.4))));ringsOn(f,1,t)});
+  beam.visible=true;sweep(seg(u,.2,2.9));if(u>3.0){beam.visible=beamGlow.visible=false}
+  chip('fp','FINDER PATTERN',Lw(-1.4,.5,-1.4),.5,u,{dy:-70});
+  chip('pos','PENANDA POSISI',[W/2,800],1.9,u,{kind:'paper',dy:0});};
+// 3: stripes ratio close-up
+S[3]=(u,d,t)=>{const f=finders[0];const k=eio(u/d);camTop(V(f.x,0,f.z+.3),lerp(8.6,8.0,k),lerp(-.08,0,k));
+  ringsOn(f,1-seg(u,0,.5),t);plateMat.color.setHex(0xa9a59a).lerp(new THREE.Color(0x4a4843),eio(seg(u,.2,1.2)));
+  ratioLine(0,0,eo(seg(u,1.3,3.7)));
+  chip('rasio','1 : 1 : 3 : 1 : 1',[W/2,800],3.75,u,{kind:'paper',dy:0});};
+// 4: any angle through center
+S[4]=(u,d,t)=>{const f=finders[0];const k=eio(u/d);camTop(V(f.x,0,f.z+.3),lerp(8.0,8.5,k),0);
+  plateMat.color.setHex(0x4a4843);const th=lerp(0,Math.PI*0.86,eio(seg(u,.3,4.6)));ratioLine(0,th,1);
+  chip('rasio2','1 : 1 : 3 : 1 : 1',[W/2,800],0,u,{kind:'paper',dy:0});
+  chip('tetap','RASIO TETAP',[W/2,250],1.6,u,{dy:0});};
+// 5: tilted code, scanner finds them
+S[5]=(u,d,t)=>{qr.rotation.set(lerp(-.32,-.42,eio(u/d)),lerp(.5,.9,eio(u/d)),.28,'XYZ');qr.position.y=.3;
+  const k=eio(u/d);camOrbit(V(0,.2,.3),lerp(-.5,-.3,k),.92,lerp(20.4,19.6,k));
+  beam.visible=true;sweep(seg(u,.1,2.4));if(u>2.5){beam.visible=beamGlow.visible=false}
+  const hit=[.1+(.5-(-1.4+HALF+.5)/(PW+1)*0)*0,0,0];
+  finders.forEach((f,j)=>{const p=(f.z+HALF+.5)/(2*HALF+1);const tp=.1+p*2.3;ringsOn(f,eob(seg(u,tp,tp+.3))>0?Math.min(1,eob(seg(u,tp,tp+.3))):0,t);
+    const s=1+.12*Math.sin(Math.PI*seg(u,tp,tp+.4));f.g.scale.set(s,1,s)});
+  chip('ketemu','DITEMUKAN!',[W/2,800],2.75,u,{kind:'paper',dy:0});};
+// 6: one empty corner -> which way is up
+S[6]=(u,d,t)=>{const rot=lerp(2.2,0,eio(seg(u,1.7,2.9)));qr.rotation.set(0,rot,0);
+  camTop(V(0,0,.15),lerp(19,18.3,eio(u/d)),0);
+  finders.forEach(f=>ringsOn(f,1,t));
+  emptyMark.visible=u>.35;emptyMark.children.forEach(m=>m.material.opacity=seg(u,.35,.7));
+  chip('kosong','POJOK KOSONG',Lw(1.4,.2,1.4+3.5*M+.25),.6,u,{kind:'paper',dy:62,until:2.0});
+  chip('atas',UP+'ATAS',Lw(0,.2,-HALF+.5),3.0,u,{dy:-6});};
+// 7: straighten and read data
+S[7]=(u,d,t)=>{const a=1-eio(seg(u,0,1.3));qr.rotation.set(-.35*a,.6*a,.25*a,'XYZ');qr.position.y=.3*a;
+  const k=eio(u/d);camOrbit(V(0,0,.2),lerp(.25,-.15,k),lerp(1.05,1.2,k),lerp(18,17.6,k));
+  finders.forEach(f=>ringsOn(f,1-seg(u,1.0,1.4)*.6,t));
+  const head=lerp(-20,data.length+20,seg(u,1.4,4.1));
+  setInst(null,i=>{const dd=head-rank[i];return dd>=0&&dd<26?tmpC.copy(cBlue).lerp(cInk,dd/26):(dd>=26?tmpC.copy(cInk).lerp(cBlue,.12):cInk)});instDirty=true;
+  chip('data','DATA',Lw(.6,.3,.9),2.0,u,{dy:-12});};
+// 8: any angle works
+S[8]=(u,d,t)=>{const k=eio(u/d);qr.rotation.set(-.2*k,u*.55,.12*k,'XYZ');
+  camOrbit(V(0,0,.3),.1,lerp(1.3,1.0,k),lerp(17.6,19.6,k));finders.forEach(f=>{ringsOn(f,1,t);lift(f,.25*eo(seg(u,0,.6)))});
+  chip('sudut','SUDUT MANA PUN',[W/2,800],.8,u,{kind:'paper',dy:0});};
 // 9: end card
-S[9]=(u,d,t)=>{gMain.visible=gSecond.visible=gThird.visible=true;
-  camOrbit(V(0,1.0,-1.5),-.3+u*.12,.2,17);};
+S[9]=(u,d,t)=>{qr.rotation.set(-.2,1.8+u*.4,.12,'XYZ');finders.forEach(f=>{ringsOn(f,1,t);lift(f,.25)});camOrbit(V(0,0,.3),.1,1.0,20);};
 
 // ---------- frame ----------
 function sceneAt(t){for(let i=TL.scenes.length-1;i>=0;i--)if(t>=TL.scenes[i].t0-1e-6)return i;return 0}

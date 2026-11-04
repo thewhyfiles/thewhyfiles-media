@@ -4,15 +4,15 @@ import os; S=os.environ["S"]
 voice="am_michael"
 k=Kokoro(f"{S}/tts/kokoro.onnx", f"{S}/tts/voices.bin")
 lines=[
-"Egypt's pyramids are more than four thousand years old.",
-"But why the pyramid shape?",
-"Early royal tombs were low, flat blocks called mastabas.",
-"Then Imhotep stacked them, each one smaller than the last.",
-"The result: Djoser's Step Pyramid, about sixty metres tall.",
-"Stone is strong when squeezed, but weak when it bends.",
-"In a pyramid, every block rests on a wider layer below it.",
-"Most of the mass sits low, so the weight flows into the ground.",
-"Smoothed out, the Great Pyramid was Earth's tallest structure for nearly four thousand years.",
+"Look closely at any QR code.",
+"It has three big squares in its corners. Why?",
+"These finder patterns show the camera where the code is.",
+"Each has the same stripes: dark, light, thick core, light, dark.",
+"From any angle through its center, the ratio stays one, one, three, one, one.",
+"So a scanner spots them instantly, even when the code is tilted.",
+"One corner is empty, so the scanner knows which way is up.",
+"It straightens the grid, then reads the tiny squares as data.",
+"Three simple squares, and any angle works.",
 "Everything has a reason.",
 ]
 out=[]
