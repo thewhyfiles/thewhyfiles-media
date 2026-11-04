@@ -1,0 +1,27 @@
+name: render-reel
+on:
+  push:
+    branches: [build]
+permissions:
+  contents: write
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '20'}
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - run: md5sum index.html render.cjs cover.cjs cover.json gen_vo.py build_timeline.cjs audio.py build.sh
+      - run: bash build.sh
+      - name: push reel + cover to latest
+        run: |
+          mkdir pub && cp out/reel.mp4 out/cover.jpg pub/ && cd pub
+          git init -q -b latest && git add reel.mp4 cover.jpg
+          git -c user.name=thewhyfiles-bot -c user.email=bot@users.noreply.github.com commit -qm "reel $(date -u +%F)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" latest
+          git rev-parse HEAD
+          ls -l reel.mp4 cover.jpg

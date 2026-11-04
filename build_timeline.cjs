@@ -1,0 +1,11 @@
+const fs=require('fs');const S=process.env.S;
+const vo=JSON.parse(fs.readFileSync(S+'/vo/am_michael.json'));
+const ID=["Piramida Mesir berusia lebih dari 4.000 tahun.","Tapi kenapa bentuknya piramida?","Makam raja awalnya balok rendah dan datar: mastaba.","Lalu Imhotep menumpuknya, makin ke atas makin kecil.","Hasilnya: Piramida Bertingkat Djoser, tinggi sekitar 60 meter.","Batu kuat saat ditekan, tapi lemah saat dibengkokkan.","Di piramida, tiap balok bertumpu pada lapisan yang lebih lebar.","Sebagian besar massa ada di bawah, beban mengalir ke tanah.","Piramida Agung: bangunan tertinggi di Bumi hampir 4.000 tahun.","Setiap hal punya alasan."];
+const fr=x=>Math.round(x*30)/30;
+let t=0.45;const lines=[];
+vo.forEach((v,i)=>{lines.push({i,start:fr(t),dur:v.dur,en:v.text,id:ID[i],path:v.path});t+=v.dur+0.32;});
+const scenes=lines.map((l,i)=>({i,t0:i==0?0:fr(l.start-0.15),start:l.start,dur:l.dur,en:l.en,id:l.id}));
+scenes.forEach((s,i)=>{s.t1=i<scenes.length-1?scenes[i+1].t0:fr(lines[i].start+lines[i].dur+1.0);});
+const total=scenes[scenes.length-1].t1;
+fs.writeFileSync('timeline.json',JSON.stringify({scenes,lines,total},null,1));
+console.log(scenes.map(s=>[s.i,s.t0.toFixed(2),(s.t1-s.t0).toFixed(2)].join(':')).join(' '),'total',total.toFixed(2));
