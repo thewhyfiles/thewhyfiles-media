@@ -4,15 +4,16 @@ import os; S=os.environ["S"]
 voice="am_michael"
 k=Kokoro(f"{S}/tts/kokoro.onnx", f"{S}/tts/voices.bin")
 lines=[
-"Drop an ice cube into water.",
-"It floats. But that's actually strange. Why?",
-"For most substances, the solid is denser than the liquid, so it sinks.",
-"Water is a rare exception.",
-"In liquid water, molecules tumble and pack closely together.",
-"When it freezes, hydrogen bonds lock them into an open, hexagonal lattice.",
-"All that empty space makes ice about nine percent less dense.",
-"So it floats, with about ninety percent hidden below the surface.",
-"That's why lakes freeze from the top down, and fish survive underneath.",
+"Why do clock hands turn this way?",
+"Long before gears, people told time with shadows.",
+"A sundial is a pointer that casts a shadow.",
+"Up north, the sun rises in the east and crosses the southern sky.",
+"So the shadow sweeps from west, through north, to east.",
+"Seen from above, that turn is clockwise.",
+"Our clocks took shape in medieval Europe, far up north.",
+"Clockmakers likely copied that familiar motion.",
+"Down south, a sundial's shadow turns the other way.",
+"But by then, clockwise was already the standard.",
 "Everything has a reason.",
 ]
 out=[]

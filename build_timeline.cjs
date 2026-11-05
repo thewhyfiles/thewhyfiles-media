@@ -1,6 +1,6 @@
 const fs=require('fs');const S=process.env.S;
 const vo=JSON.parse(fs.readFileSync(S+'/vo/am_michael.json'));
-const ID=["Jatuhkan es batu ke dalam air.","Ia mengapung. Padahal itu aneh. Kenapa?","Bagi kebanyakan zat, wujud padatnya lebih rapat, jadi tenggelam.","Air adalah pengecualian langka.","Di air cair, molekul bergerak dan berdesakan rapat.","Saat membeku, ikatan hidrogen mengunci mereka jadi kisi segi enam yang renggang.","Ruang kosong itu membuat es sekitar 9% kurang rapat.","Jadi ia mengapung, sekitar 90% tersembunyi di bawah permukaan.","Karena itu danau membeku dari atas, dan ikan bertahan di bawahnya.","Setiap hal punya alasan."];
+const ID=["Kenapa jarum jam berputar ke arah ini?","Jauh sebelum roda gigi, orang membaca waktu dari bayangan.","Jam matahari adalah penunjuk yang membentuk bayangan.","Di belahan utara, matahari terbit di timur lalu melintasi langit selatan.","Jadi bayangan menyapu dari barat, lewat utara, ke timur.","Dilihat dari atas, putaran itu searah jarum jam.","Jam kita lahir di Eropa abad pertengahan, jauh di utara.","Pembuat jam kemungkinan meniru gerak yang sudah akrab itu.","Di belahan selatan, bayangan jam matahari berputar sebaliknya.","Tapi saat itu, arah jarum jam sudah jadi standar.","Setiap hal punya alasan."];
 const fr=x=>Math.round(x*30)/30;
 let t=0.45;const lines=[];
 vo.forEach((v,i)=>{lines.push({i,start:fr(t),dur:v.dur,en:v.text,id:ID[i],path:v.path});t+=v.dur+0.32;});

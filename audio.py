@@ -3,19 +3,16 @@ from scipy import signal
 import os; S=os.environ["S"]
 SR=48000
 TL=json.load(open(f"{S}/work/timeline.json"));total=TL["total"];N=int(total*SR)
-SC=[s["t0"] for s in TL["scenes"]]
 rng=np.random.default_rng(3)
 def place(buf,x,t,g=1.0):
     i=int(t*SR);j=min(len(buf),i+len(x));
     if i<len(buf):buf[i:j]+=x[:j-i]*g
-# --- VO
 vo=np.zeros(N)
 for l in TL["lines"]:
     a,sr=sf.read(l["path"]);
     a=signal.resample_poly(a,SR,sr)
     place(vo,a,l["start"],1.0)
 vo/=max(1e-9,np.abs(vo).max());vo*=0.9
-# --- music pad: Am - F - C - G slow
 chords=[[57,60,64],[53,57,60],[48,52,55],[55,59,62]]
 mus=np.zeros(N);t=np.arange(N)/SR
 seg=9.0
@@ -32,7 +29,6 @@ mus*=0.8+0.2*np.sin(2*np.pi*t/4.5)
 b,a=signal.butter(2,1400/(SR/2));mus=signal.lfilter(b,a,mus)
 mus*=np.clip(t/1.5,0,1)*np.clip((total-t)/2.5,0,1)
 mus/=np.abs(mus).max()
-# --- SFX
 sfx=np.zeros(N)
 def noise(d):return rng.standard_normal(int(d*SR))
 def whoosh(t0,d=.45,g=.5,down=False):
@@ -45,21 +41,16 @@ def whoosh(t0,d=.45,g=.5,down=False):
     env=np.sin(np.pi*tt)**2;place(sfx,out*env,t0,g/ max(1e-6,np.abs(out).max()))
 def pop(t0,g=.5):
     d=.18;tt=np.arange(int(d*SR))/SR;x=np.sin(2*np.pi*(900+500*np.exp(-tt*40))*tt)*np.exp(-tt*28);place(sfx,x,t0,g)
-def thud(t0,g=.9,f=60,d=.7):
-    tt=np.arange(int(d*SR))/SR;x=np.sin(2*np.pi*(f+50*np.exp(-tt*25))*tt)*np.exp(-tt*7);x+=0.3*signal.lfilter(*signal.butter(2,500/(SR/2)),noise(d))*np.exp(-tt*30);place(sfx,x,t0,g)
-def splash(t0,g=.7,d=.6):
-    tt=np.arange(int(d*SR))/SR;n=signal.lfilter(*signal.butter(2,[300/(SR/2),3000/(SR/2)],btype='band'),noise(d))
-    x=n*np.exp(-tt*9)/np.abs(n).max();x+=0.5*np.sin(2*np.pi*(180+400*np.exp(-tt*30))*tt)*np.exp(-tt*14);place(sfx,x,t0,g)
-def chime(t0,g=.3,d=1.2):
-    tt=np.arange(int(d*SR))/SR;x=sum(np.sin(2*np.pi*f*tt)*a for f,a in [(1568,1),(2349,.5),(3136,.3)])*np.exp(-tt*4);place(sfx,x,t0,g)
-for c in SC[1:]:whoosh(max(0,c-.12),.4,.35)
-CH={1:[.35,1.85],2:[.5,1.3,2.7],3:[.25,.55,1.0],4:[.5,2.5],5:[.4,2.9,3.3],6:[.9,2.4],7:[.7,2.0],8:[.4,2.3]}
+def tick(t0,g=.25,f=2600):
+    d=.05;tt=np.arange(int(d*SR))/SR;x=(np.sin(2*np.pi*f*tt)+0.5*signal.lfilter(*signal.butter(2,[1500/(SR/2),6000/(SR/2)],'band'),noise(d)))*np.exp(-tt*140);place(sfx,x,t0,g)
+SC=TL["scenes"]
+for s in SC[1:]:whoosh(max(0,s["t0"]-.12),.4,.35)
+CH={0:[1.3],1:[0.05,1.4],2:[.5,1.3],3:[.5,2.4],4:[.3,1.5,2.7],5:[.35,1.0],6:[.6],7:[1.0],8:[.3,1.6],9:[.9]}
 for i,offs in CH.items():
-    for o in offs:pop(SC[i]+o,.35)
-whoosh(SC[0]+.25,.5,.4,down=True);splash(SC[0]+.74,.8);thud(SC[0]+.76,.4,70,.4)   # ice drops in
-splash(SC[2]+.15,.45)                                                               # solid enters liquid
-thud(SC[2]+2.8,.4,60,.5)                                                            # solid hits bottom
-chime(SC[5]+2.2,.35)                                                                # lattice locks
+    for o in offs:pop(SC[i]["t0"]+o,.35)
+for i in (0,9):
+    s=SC[i];x=s["t0"]+.2;k=0
+    while x<s["t1"]-.1:tick(x,.22,2600 if k%2==0 else 2200);x+=.5;k+=1
 sfx/=np.abs(sfx).max()
 mix=vo*1.0+mus*0.11+sfx*0.16
 mix=np.tanh(mix*1.0)
