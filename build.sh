@@ -7,7 +7,7 @@ curl -sSL -o $S/tts/voices.bin https://github.com/thewh1teagle/kokoro-onnx/relea
 npm init -y >/dev/null; npm i -s three @fontsource/sora @fontsource/inter @fontsource/dm-serif-display playwright
 npx playwright install --with-deps chromium
 python3 gen_vo.py; node build_timeline.cjs
-CONC=$(nproc) node render.cjs scenes 4 7 0 1 2 8 9 3 5 6
+CONC=$(nproc) node render.cjs scenes 7 8 5 6 4 2 0 1 3 9
 node cover.cjs
 python3 audio.py
 cd out; ls scene_*.mp4 | sed "s/.*/file '&'/" > list.txt

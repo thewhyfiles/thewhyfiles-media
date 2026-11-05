@@ -4,15 +4,15 @@ import os; S=os.environ["S"]
 voice="am_michael"
 k=Kokoro(f"{S}/tts/kokoro.onnx", f"{S}/tts/voices.bin")
 lines=[
-"Look closely at any QR code.",
-"It has three big squares in its corners. Why?",
-"These finder patterns show the camera where the code is.",
-"Each has the same stripes: dark, light, thick core, light, dark.",
-"From any angle through its center, the ratio stays one, one, three, one, one.",
-"So a scanner spots them instantly, even when the code is tilted.",
-"One corner is empty, so the scanner knows which way is up.",
-"It straightens the grid, then reads the tiny squares as data.",
-"Three simple squares, and any angle works.",
+"Drop an ice cube into water.",
+"It floats. But that's actually strange. Why?",
+"For most substances, the solid is denser than the liquid, so it sinks.",
+"Water is a rare exception.",
+"In liquid water, molecules tumble and pack closely together.",
+"When it freezes, hydrogen bonds lock them into an open, hexagonal lattice.",
+"All that empty space makes ice about nine percent less dense.",
+"So it floats, with about ninety percent hidden below the surface.",
+"That's why lakes freeze from the top down, and fish survive underneath.",
 "Everything has a reason.",
 ]
 out=[]

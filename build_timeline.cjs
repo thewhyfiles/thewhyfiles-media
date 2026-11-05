@@ -1,6 +1,6 @@
 const fs=require('fs');const S=process.env.S;
 const vo=JSON.parse(fs.readFileSync(S+'/vo/am_michael.json'));
-const ID=["Lihat baik-baik QR code mana pun.","Ada tiga kotak besar di pojoknya. Kenapa?","Finder pattern ini menunjukkan posisi kode ke kamera.","Polanya sama: gelap, terang, inti tebal, terang, gelap.","Dari sudut mana pun lewat tengahnya, rasionya tetap 1:1:3:1:1.","Jadi pemindai langsung menemukannya, walau kodenya miring.","Satu pojok kosong, jadi pemindai tahu mana arah atas.","Kisinya diluruskan, lalu kotak kecil dibaca sebagai data.","Tiga kotak sederhana, sudut mana pun bisa.","Setiap hal punya alasan."];
+const ID=["Jatuhkan es batu ke dalam air.","Ia mengapung. Padahal itu aneh. Kenapa?","Bagi kebanyakan zat, wujud padatnya lebih rapat, jadi tenggelam.","Air adalah pengecualian langka.","Di air cair, molekul bergerak dan berdesakan rapat.","Saat membeku, ikatan hidrogen mengunci mereka jadi kisi segi enam yang renggang.","Ruang kosong itu membuat es sekitar 9% kurang rapat.","Jadi ia mengapung, sekitar 90% tersembunyi di bawah permukaan.","Karena itu danau membeku dari atas, dan ikan bertahan di bawahnya.","Setiap hal punya alasan."];
 const fr=x=>Math.round(x*30)/30;
 let t=0.45;const lines=[];
 vo.forEach((v,i)=>{lines.push({i,start:fr(t),dur:v.dur,en:v.text,id:ID[i],path:v.path});t+=v.dur+0.32;});
