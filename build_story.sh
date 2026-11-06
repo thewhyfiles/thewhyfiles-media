@@ -19,7 +19,9 @@ done
 ls "$F"
 S="$ROOT/engine/scripts/story2d.py"
 python "$S" --kit brand-kit.json --beats story.json --out "$W/reel.mp4" --workdir "$W/work" --jobs "$(nproc)" --audio "$W/out/vo_n.wav"
+# runner ffmpeg tags mjpeg-sourced beats as full-range yuvj420p -> normalize to limited-range yuv420p
+ffmpeg -y -loglevel error -i "$W/reel.mp4" -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -color_range tv -c:v libx264 -crf 20 -preset medium -c:a copy -movflags +faststart "$W/reel_tv.mp4" && mv "$W/reel_tv.mp4" "$W/reel.mp4"
 python "$S" --kit brand-kit.json --beats cover_story.json --stills "$W/cover"
 python -c "from PIL import Image; Image.open('$W/cover/b01_2.png').convert('RGB').resize((1080,1920), Image.LANCZOS).save('$W/cover.jpg', quality=92)"
-ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate -show_entries format=duration -of compact "$W/reel.mp4"
+ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate,pix_fmt -show_entries format=duration -of compact "$W/reel.mp4"
 mkdir -p "$ROOT/pub"; cp "$W/reel.mp4" "$W/cover.jpg" "$ROOT/pub/"; cp "$W/out/timing.json" "$ROOT/pub/timing.json"
