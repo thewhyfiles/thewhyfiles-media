@@ -1,44 +1,31 @@
 #!/usr/bin/env bash
-# Render Reels Story 2D (skill dossier-motion) dari reel/job/ di GitHub Actions.
-# Input: job/script.json (5 kalimat VO), job/gen_story.py (penulis story.json + cover_story.json),
-#        job/brand-kit.json, job/reel.json ({"slug": ...}). Output: out/reel.mp4, out/cover.jpg,
-#        out/contact.png, out/manifest.json.
+# Reel build (Remotion) di GitHub Actions: audio (URL) + job/*.json -> reel.mp4 + cover.jpg -> pub/
 set -euo pipefail
-cd "$(dirname "$0")"
-R=$(pwd)
-rm -rf out work && mkdir -p out work model engine/assets/reels3d/fonts
-
-# 1. Dependensi (SKIP_SETUP=1 untuk uji lokal)
-if [ "${SKIP_SETUP:-0}" != "1" ]; then
-  npm install --no-audit --no-fund --silent
-  pip install -q playwright pillow numpy kokoro-onnx soundfile
-  python3 -m playwright install --with-deps chromium
+ROOT=$PWD
+mkdir -p out pub public
+if [ -s job/audio.url ]; then
+  URL="$(tr -d '\r\n ' < job/audio.url)"
+  curl -fsSL --retry 3 -o public/narasi.wav "$URL"
+  ffprobe -v error -show_entries stream=codec_name,sample_rate,channels -show_entries format=duration -of compact public/narasi.wav
+else
+  echo "TIDAK ADA job/audio.url -> render tanpa suara"; rm -f public/narasi.wav
 fi
-
-# 2. Font panggung (woff2 dari @fontsource, nama sama dengan font bawaan skill)
-F=node_modules/@fontsource
-D=engine/assets/reels3d/fonts
-cp $F/plus-jakarta-sans/files/plus-jakarta-sans-latin-{700,800}-normal.woff2 $D/
-cp $F/inter/files/inter-latin-{400,500}-normal.woff2 $D/
-cp $F/dm-serif-display/files/dm-serif-display-latin-400-normal.woff2 $D/
-cp $F/jetbrains-mono/files/jetbrains-mono-latin-{500,700}-normal.woff2 $D/
-
-# 3. Voice over (Kokoro am_michael) + waktu beat
-for f in kokoro-v1.0.onnx voices-v1.0.bin; do
-  [ -s model/$f ] || curl -sSL --fail -o model/$f https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/$f
-done
-( cd model && python3 "$R/engine/scripts/mkvo.py" "$R/job/script.json" "$R/work/vo" )
-ffmpeg -y -loglevel error -i work/vo/vo.wav -af loudnorm=I=-16:TP=-1.5:LRA=11 -ar 48000 work/vo/vo_n.wav
-
-# 4. Story + cover dari generator hari ini
-( cd job && TIMING="$R/work/vo/timing.json" OUT_DIR="$R/work" \
-  FONT_WOFF="$R/$F/plus-jakarta-sans/files/plus-jakarta-sans-latin-%d-normal.woff" python3 gen_story.py )
-
-# 5. Render
-S=engine/scripts/story2d.py
-python3 $S --kit job/brand-kit.json --beats work/story.json --stills "$R/work/stills"
-cp work/stills/contact.png out/contact.png
-python3 $S --kit job/brand-kit.json --beats work/story.json --out "$R/out/reel.mp4" --workdir "$R/work/beats" --jobs 2 --audio "$R/work/vo/vo_n.wav"
-python3 $S --kit job/brand-kit.json --beats work/cover_story.json --stills "$R/work/cover" --size 1080x1920
-# 6. Cover JPEG, pemeriksaan, manifest
-python3 finish_reel.py
+npm install --no-audit --no-fund --loglevel=error
+node scripts/mkprops.mjs
+# cek durasi audio vs timing (toleransi 1,5 dtk)
+if [ -f public/narasi.wav ]; then
+  node -e "
+const t=require('./job/timing.json');const e=t[t.length-1].start+t[t.length-1].dur;
+const {execSync}=require('child_process');
+const d=parseFloat(execSync('ffprobe -v error -show_entries format=duration -of csv=p=0 public/narasi.wav').toString());
+console.log('audio',d,'timing',e);
+if(Math.abs(d-e)>1.5){console.error('DURASI AUDIO TIDAK COCOK DENGAN TIMING');process.exit(1)}"
+fi
+npx remotion render src/index.tsx Reel out/raw.mp4 --concurrency="$(nproc)" --crf=18 --log=error
+npx remotion still src/index.tsx Cover out/cover.png --log=error
+# normalisasi: limited-range yuv420p, loudnorm ke -14 LUFS, AAC 48 kHz stereo, faststart
+if [ -f public/narasi.wav ]; then AF="-af loudnorm=I=-14:TP=-1.5:LRA=11 -ar 48000 -ac 2 -c:a aac -b:a 192k"; else AF="-an"; fi
+ffmpeg -y -loglevel error -i out/raw.mp4 -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -color_range tv -c:v libx264 -crf 20 -preset medium $AF -movflags +faststart pub/reel.mp4
+ffmpeg -y -loglevel error -i out/cover.png -vf scale=1080:1920 -q:v 2 pub/cover.jpg
+cp job/timing.json pub/timing.json
+ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate,pix_fmt,sample_rate -show_entries format=duration,size -of compact pub/reel.mp4
