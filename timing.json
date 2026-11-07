@@ -1,0 +1,177 @@
+[
+ {
+  "text": "Someone yawns, and suddenly you want to yawn too.",
+  "start": 0.25,
+  "dur": 3.072,
+  "beat": 3.672,
+  "word_times": [
+   0.25,
+   0.689,
+   1.176,
+   1.42,
+   1.908,
+   2.152,
+   2.444,
+   2.639,
+   2.932,
+   3.322
+  ]
+ },
+ {
+  "text": "Yawning is contagious, and scientists can't fully explain why.",
+  "start": 0.25,
+  "dur": 4.224,
+  "beat": 4.824,
+  "word_times": [
+   0.25,
+   0.75,
+   0.973,
+   1.806,
+   2.084,
+   2.751,
+   3.14,
+   3.529,
+   4.029,
+   4.474
+  ]
+ },
+ {
+  "text": "In one study, 328 people watched a video of yawns.",
+  "start": 0.25,
+  "dur": 4.715,
+  "beat": 5.315,
+  "word_times": [
+   0.25,
+   0.54,
+   0.903,
+   1.628,
+   1.991,
+   2.571,
+   3.224,
+   3.441,
+   3.949,
+   4.239,
+   4.965
+  ]
+ },
+ {
+  "text": "Most of them, 222, yawned at least once.",
+  "start": 0.25,
+  "dur": 3.669,
+  "beat": 4.269,
+  "word_times": [
+   0.25,
+   0.65,
+   0.917,
+   1.518,
+   2.051,
+   2.585,
+   2.852,
+   3.319,
+   3.919
+  ]
+ },
+ {
+  "text": "A 2018 study linked catching yawns to slightly higher empathy.",
+  "start": 0.25,
+  "dur": 5.397,
+  "beat": 5.997,
+  "word_times": [
+   0.25,
+   0.466,
+   0.898,
+   1.401,
+   1.977,
+   2.697,
+   3.201,
+   3.488,
+   4.208,
+   4.784,
+   5.647
+  ]
+ },
+ {
+  "text": "But the 2014 study found no strong link with empathy.",
+  "start": 0.25,
+  "dur": 4.501,
+  "beat": 5.101,
+  "word_times": [
+   0.25,
+   0.591,
+   0.932,
+   1.341,
+   1.819,
+   2.296,
+   2.569,
+   3.114,
+   3.524,
+   3.933,
+   4.751
+  ]
+ },
+ {
+  "text": "Age mattered: older people were less likely to catch yawns.",
+  "start": 0.25,
+  "dur": 3.947,
+  "beat": 4.547,
+  "word_times": [
+   0.25,
+   0.524,
+   1.127,
+   1.511,
+   1.949,
+   2.278,
+   2.607,
+   3.046,
+   3.265,
+   3.649,
+   4.197
+  ]
+ },
+ {
+  "text": "Yet age explained only eight percent of the differences.",
+  "start": 0.25,
+  "dur": 3.435,
+  "beat": 4.035,
+  "word_times": [
+   0.25,
+   0.503,
+   0.755,
+   1.311,
+   1.614,
+   1.967,
+   2.422,
+   2.624,
+   2.877,
+   3.685
+  ]
+ },
+ {
+  "text": "The rest is still a mystery.",
+  "start": 0.25,
+  "dur": 1.749,
+  "beat": 2.8,
+  "word_times": [
+   0.25,
+   0.486,
+   0.77,
+   0.959,
+   1.29,
+   1.432,
+   1.999
+  ]
+ },
+ {
+  "text": "Everything has a reason.",
+  "start": 0.25,
+  "dur": 1.621,
+  "beat": 2.8,
+  "word_times": [
+   0.25,
+   0.878,
+   1.139,
+   1.296,
+   1.871
+  ]
+ }
+]
